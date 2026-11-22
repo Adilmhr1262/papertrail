@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="PaperTrail — a private, offline tracker for where your important documents are stored and when they expire.">
+<meta name="theme-color" content="#1E3A5F">
+<title>PaperTrail — Document Location &amp; Renewal Tracker</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<div class="app">
+  <aside class="sidebar" aria-label="Main navigation">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6"/><path d="M9 17h6"/></svg>
+      </span>
+      <div>
+        <span class="brand-name">PaperTrail</span>
+        <span class="brand-tag">Documents, kept in sight</span>
+      </div>
+    </div>
+    <nav class="nav" aria-label="Sections">
+      <button type="button" class="nav-item is-active" data-view="dashboard" aria-current="page">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9 21v-6h6v6"/></svg>
+        Dashboard
+      </button>
+      <button type="button" class="nav-item" data-view="documents">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6"/><path d="M9 17h6"/></svg>
+        My Documents
+      </button>
+      <button type="button" class="nav-item" data-view="locations">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Locations
+      </button>
+      <button type="button" class="nav-item" data-view="settings">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </button>
+    </nav>
+    <p class="sidebar-note">Your records stay on this device. Nothing is uploaded.</p>
+  </aside>
+
+  <main class="main" id="main">
+    <!-- ============ DASHBOARD ============ -->
+    <section class="view is-active" id="view-dashboard" aria-labelledby="dashboard-heading">
+      <header class="page-head">
+        <div>
+          <h1 id="dashboard-heading">Dashboard</h1>
+          <p class="page-sub" id="dashboard-date"></p>
+        </div>
+        <button type="button" class="btn btn-primary" id="dashAddDocBtn">Add document</button>
+      </header>
+
+      <div class="stats" role="group" aria-label="Document totals">
+        <article class="stat-card">
+          <span class="stat-label">Total Documents</span>
+          <span class="stat-value" id="statTotal">0</span>
+        </article>
+        <article class="stat-card stat-warn">
+          <span class="stat-label">Expiring Soon</span>
+          <span class="stat-value" id="statSoon">0</span>
+        </article>
+        <article class="stat-card stat-bad">
+          <span class="stat-label">Expired</span>
+          <span class="stat-value" id="statExpired">0</span>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label">No Expiry Date</span>
+          <span class="stat-value" id="statNoExpiry">0</span>
+        </article>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Needs attention</h2>
+          <span class="panel-hint" id="attentionHint"></span>
+        </div>
+        <ul class="attention-list" id="attentionList"></ul>
+        <div class="empty" id="attentionEmpty">
+          <p class="empty-title">Nothing needs attention</p>
+          <p class="empty-text">Documents that are expired or expiring soon will show up here.</p>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Recently added</h2>
+          <button type="button" class="link-btn" id="viewAllDocsBtn">View all documents</button>
+        </div>
+        <ul class="recent-list" id="recentList"></ul>
+        <div class="empty" id="recentEmpty">
+          <p class="empty-title">No documents yet</p>
+          <p class="empty-text">Add your first document to start tracking where it is stored and when it expires.</p>
+          <button type="button" class="btn btn-primary" id="emptyAddDocBtn">Add your first document</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ DOCUMENTS ============ -->
+    <section class="view" id="view-documents" aria-labelledby="documents-heading">
+      <header class="page-head">
+        <div>
+          <h1 id="documents-heading">My Documents</h1>
+          <p class="page-sub" id="docCountLabel"></p>
+        </div>
+        <button type="button" class="btn btn-primary" id="addDocBtn">Add document</button>
+      </header>
+
+      <div class="toolbar" role="search">
+        <label class="visually-hidden" for="docSearch">Search documents</label>
+        <input type="search" id="docSearch" placeholder="Search by name or reference" autocomplete="off">
+        <label class="visually-hidden" for="filterCategory">Filter by category</label>
+        <select id="filterCategory">
+          <option value="">All categories</option>
+          <option>Identity</option><option>Education</option><option>Employment</option>
+          <option>Banking</option><option>Medical</option><option>Vehicle</option>
+          <option>Property</option><option>Other</option>
+        </select>
+        <label class="visually-hidden" for="filterLocation">Filter by location</label>
+        <select id="filterLocation"><option value="">All locations</option></select>
+        <label class="visually-hidden" for="filterStatus">Filter by status</label>
+        <select id="filterStatus">
+          <option value="">All statuses</option>
+          <option value="Expired">Expired</option>
+          <option value="Expiring Soon">Expiring soon</option>
+          <option value="Valid">Valid</option>
+          <option value="No Expiry">No expiry date</option>
+        </select>
+        <label class="visually-hidden" for="sortDocs">Sort documents</label>
+        <select id="sortDocs">
+          <option value="expiry">Nearest expiry first</option>
+          <option value="name">Name A–Z</option>
+          <option value="recent">Recently added</option>
+        </select>
+      </div>
+
+      <ul class="doc-list" id="docList"></ul>
+      <div class="empty" id="docEmpty">
+        <p class="empty-title">No documents found</p>
+        <p class="empty-text" id="docEmptyText">Add a document to start tracking it.</p>
+        <button type="button" class="btn btn-primary" id="docEmptyAddBtn">Add document</button>
+      </div>
+    </section>
+
+    <!-- ============ LOCATIONS ============ -->
+    <section class="view" id="view-locations" aria-labelledby="locations-heading">
+      <header class="page-head">
+        <div>
+          <h1 id="locations-heading">Locations</h1>
+          <p class="page-sub">Where your documents live — a drawer, a folder, a safe, or a drive.</p>
+        </div>
+      </header>
+
+      <form class="panel form-panel" id="locForm">
+        <h2>Add a location</h2>
+        <div class="form-grid">
+          <div class="field">
+            <label for="locName">Location name</label>
+            <input type="text" id="locName" maxlength="100" placeholder="e.g. Home drawer, Google Drive folder" required>
+          </div>
+          <div class="field">
+            <label for="locKind">Type</label>
+            <select id="locKind">
+              <option value="">Not specified</option>
+              <option value="physical">Physical</option>
+              <option value="digital">Digital</option>
+            </select>
+          </div>
+          <div class="field field-wide">
+            <label for="locNotes">Notes <span class="optional">(optional)</span></label>
+            <input type="text" id="locNotes" maxlength="200" placeholder="e.g. Top drawer, blue folder">
+          </div>
+        </div>
+        <p class="form-error" id="locError" role="alert" hidden></p>
+        <button type="submit" class="btn btn-primary" id="addLocBtn">Add location</button>
+      </form>
+
+      <ul class="loc-list" id="locList"></ul>
+      <div class="empty" id="locEmpty">
+        <p class="empty-title">No locations yet</p>
+        <p class="empty-text">Add a location above, then assign documents to it when you add or edit them.</p>
+      </div>
+    </section>
+
+    <!-- ============ SETTINGS ============ -->
+    <section class="view" id="view-settings" aria-labelledby="settings-heading">
+      <header class="page-head">
+        <div>
+          <h1 id="settings-heading">Settings</h1>
+          <p class="page-sub">Expiry warnings, appearance, and your data.</p>
+        </div>
+      </header>
+
+      <div class="panel form-panel">
+        <h2>Expiry warning</h2>
+        <div class="field">
+          <label for="thresholdSelect">Warn me when a document expires within</label>
+          <select id="thresholdSelect">
+            <option value="7">7 days</option>
+            <option value="14">14 days</option>
+            <option value="30" selected>30 days</option>
+            <option value="60">60 days</option>
+            <option value="90">90 days</option>
+          </select>
+          <p class="field-help">Documents expiring within this window count as “Expiring soon”.</p>
+        </div>
+      </div>
+
+      <div class="panel form-panel">
+        <h2>Appearance</h2>
+        <fieldset class="theme-field">
+          <legend>Theme</legend>
+          <label class="radio-row"><input type="radio" name="theme" value="system" checked> System</label>
+          <label class="radio-row"><input type="radio" name="theme" value="light"> Light</label>
+          <label class="radio-row"><input type="radio" name="theme" value="dark"> Dark</label>
+        </fieldset>
+      </div>
+
+      <div class="panel form-panel">
+        <h2>Your data</h2>
+        <p class="field-help" id="dataSummary"></p>
+        <div class="btn-row">
+          <button type="button" class="btn btn-secondary" id="exportBtn">Export backup (JSON)</button>
+          <button type="button" class="btn btn-secondary" id="exportCsvBtn">Export list (CSV)</button>
+          <label class="btn btn-secondary file-btn" for="importFile">Import backup (JSON)</label>
+          <input type="file" id="importFile" accept=".json,application/json" class="visually-hidden">
+        </div>
+        <p class="form-error" id="importError" role="alert" hidden></p>
+        <p class="field-help">Import checks the whole file first. A bad file is rejected and your current data stays untouched.</p>
+      </div>
+
+      <div class="panel form-panel danger-panel">
+        <h2>Delete all data</h2>
+        <p class="field-help">This permanently deletes every document, location, and setting stored on this device. This cannot be undone.</p>
+        <div class="field">
+          <label for="clearConfirm">Type DELETE to confirm</label>
+          <input type="text" id="clearConfirm" placeholder="DELETE" autocomplete="off">
+        </div>
+        <button type="button" class="btn btn-danger" id="clearAllBtn" disabled>Delete all data</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<nav class="bottom-nav" aria-label="Sections">
+  <button type="button" class="nav-item is-active" data-view="dashboard">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9 21v-6h6v6"/></svg>
+    Home
+  </button>
+  <button type="button" class="nav-item" data-view="documents">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6"/><path d="M9 17h6"/></svg>
+    Documents
+  </button>
+  <button type="button" class="nav-item" data-view="locations">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+    Locations
+  </button>
+  <button type="button" class="nav-item" data-view="settings">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    Settings
+  </button>
+</nav>
+
+<!-- Document add/edit dialog -->
+<div class="modal-backdrop" id="docModal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="docModalTitle">
+    <div class="modal-head">
+      <h2 id="docModalTitle">Add document</h2>
+      <button type="button" class="icon-btn" id="docModalClose" aria-label="Close dialog">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <form id="docForm" novalidate>
+      <input type="hidden" id="docId">
+      <div class="form-grid">
+        <div class="field field-wide">
+          <label for="docName">Document name</label>
+          <input type="text" id="docName" maxlength="100" placeholder="e.g. Passport, Driving licence" required>
+        </div>
+        <div class="field">
+          <label for="docCategory">Category</label>
+          <select id="docCategory">
+            <option>Identity</option><option>Education</option><option>Employment</option>
+            <option>Banking</option><option>Medical</option><option>Vehicle</option>
+            <option>Property</option><option>Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="docReference">Reference <span class="optional">(optional)</span></label>
+          <input type="text" id="docReference" maxlength="100" placeholder="e.g. Document number">
+        </div>
+        <div class="field">
+          <label for="docIssueDate">Issue date <span class="optional">(optional)</span></label>
+          <input type="date" id="docIssueDate">
+        </div>
+        <div class="field">
+          <label for="docExpiryDate">Expiry date <span class="optional">(optional)</span></label>
+          <input type="date" id="docExpiryDate">
+        </div>
+        <div class="field field-wide">
+          <label for="docLocation">Stored at <span class="optional">(optional)</span></label>
+          <select id="docLocation"><option value="">Unassigned</option></select>
+        </div>
+        <div class="field field-wide">
+          <label for="docNotes">Notes <span class="optional">(optional)</span></label>
+          <textarea id="docNotes" maxlength="500" rows="3" placeholder="Anything that helps you find it again"></textarea>
+        </div>
+      </div>
+      <p class="form-error" id="docError" role="alert" hidden></p>
+      <div class="btn-row modal-actions">
+        <button type="button" class="btn btn-secondary" id="docCancelBtn">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="docSaveBtn">Save document</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="date-utils.js"></script>
+<script src="storage.js"></script>
+<script src="backup.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
